@@ -66,8 +66,8 @@
 #include <ctype.h> /* isdigit() */
 #include <png.h>
 
-#define HARDSET512ROWSIZE (512 *2) + 16
-#define LINE_CHARMAX 1000 /* number of max characters in bdf-font-file; number is without reason */
+#define HARDSET512ROWSIZE (4096 *2) + 16
+#define LINE_CHARMAX 100000 /* number of max characters in bdf-font-file; number is without reason */
 #define FILENAME_CHARMAX 256 /* number of max characters in filenames;  number is without reason */
 #define ON 1 /* number is without reason; only needs the difference to OFF */
 #define OFF 0 /* number is without reason; only needs the difference to ON */
@@ -152,8 +152,8 @@ void writePngFile(unsigned char *bitmapP, int spacing, int colchar, FILE *bmpP)
      unsigned long bmpTotalSize; /* bmp filesize (byte) */
      /*  bmp-lines needs to be long alined and padded with 0 */
 	int x=0,y=0,i=0;
-	png_structp png_ptr;
-	png_infop info_ptr;
+	png_structp png_ptr = 0;
+	png_infop info_ptr = 0;
 	
 	/* bmp-image width */
 	bmpw = (font.w+spacing)*colchar + spacing;
@@ -263,10 +263,10 @@ void assignBitmap(unsigned char *bitmapP, char *glyphP, int sizeglyphP, struct b
         };
         int d; /* decimal number translated from hexNumber */
         int hexlen; /* a line length(without newline code) */
-        char binP[LINE_CHARMAX]; /* binary strings translated from decimal number */
+        static char binP[LINE_CHARMAX]; /* binary strings translated from decimal number */
         static int nowchar = 0; /* number of glyphs handlled until now */
         char *tmpP;
-        char tmpsP[LINE_CHARMAX];
+        static char tmpsP[LINE_CHARMAX];
         int bitAh, bitAw; /* bitA width, height */
         int offtop, offbottom, offleft; /* glyph offset */
         unsigned char *bitAP;
@@ -395,7 +395,7 @@ int getline(char* lineP, int max, FILE* inputP){
 unsigned char *readBdfFile(unsigned char *bitmapP, FILE *readP){
         int i;
         int length;
-        char sP[LINE_CHARMAX]; /* one line(strings) from bdf-font-file */
+        static char sP[LINE_CHARMAX]; /* one line(strings) from bdf-font-file */
         static int cnt; /* only used in debugging: counter of appeared glyphs */
         struct boundingbox glyph; /* an indivisual glyph width, height,offset x,y */
         int flagBitmap = OFF; /* this line is bitmap-data?(ON) or no?(OFF) */
@@ -571,7 +571,7 @@ void printhelp(void){
 /*
  *
  */
-int main3(int argc, char *argv[]){
+int main(int argc, char *argv[]){
         FILE *readP;
         FILE *writeP;
         char readFilename[FILENAME_CHARMAX] = "input.bdf";
@@ -582,7 +582,7 @@ int main3(int argc, char *argv[]){
         int spacing = 2; /* breadth of spacing (default 2) */
         int flag;
         int colchar = 32; /* number of columns(horizontal) (default 32) */
-        char paramP[PARAM_MAX][LINE_CHARMAX]; /* parameter strings */
+        static char paramP[PARAM_MAX][LINE_CHARMAX]; /* parameter strings */
         int iflag = OFF;
         struct stat fileinfo;
 
